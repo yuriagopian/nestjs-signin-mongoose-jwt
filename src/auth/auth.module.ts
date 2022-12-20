@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PassportModule } from '@nestjs/passport';
 import { UsersSchema } from 'src/users/schema/users.schema';
 import { AuthService } from './auth.service';
 
@@ -11,6 +13,13 @@ import { AuthService } from './auth.service';
         schema: UsersSchema,
       },
     ]),
+    PassportModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: {
+        expiresIn: process.env.JWT_EXPIRATION,
+      },
+    }),
   ],
   providers: [AuthService],
 })
