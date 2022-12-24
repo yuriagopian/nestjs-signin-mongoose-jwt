@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { sign } from 'jsonwebtoken';
 import { Model } from 'mongoose';
@@ -12,14 +12,26 @@ export class AuthService {
   ) {}
 
   public async createAccessToken(userId: string): Promise<string> {
-    return sign(
-      {
-        userId,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: process.env.JWT_EXPIRATION,
-      },
-    );
+    const payload = {
+      userId,
+    };
+    const secret = process.env.JWT_SECRET;
+    const signOptions = {
+      expiresIn: process.env.JWT_EXPIRATION,
+    };
+
+    return sign(payload, secret, signOptions);
+  }
+
+  public async validateUser(userId: string): Promise<User> {
+    const user = await this.usersModel.findOne({
+      _id: userId,
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return user;
   }
 }
