@@ -1,5 +1,5 @@
 import {
-  BadGatewayException,
+  BadRequestException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -40,13 +40,19 @@ export class AuthService {
     return user;
   }
 
-  private jwtExtractor(request: Request): string {
+  private static jwtExtractor(request: Request): string {
     const authHeader = request.headers.authorization;
+
     if (!authHeader) {
-      throw new BadGatewayException('Bad Request');
+      throw new BadRequestException('Bad request.');
     }
+
     const [, token] = authHeader.split(' ');
 
     return token;
+  }
+
+  public returnJwtExtractor(): (request: Request) => string {
+    return AuthService.jwtExtractor;
   }
 }
