@@ -1,8 +1,13 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { sign } from 'jsonwebtoken';
 import { Model } from 'mongoose';
 import { User } from 'src/users/models/users.model';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -33,5 +38,15 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  private jwtExtractor(request: Request): string {
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      throw new BadGatewayException('Bad Request');
+    }
+    const [, token] = authHeader.split(' ');
+
+    return token;
   }
 }
