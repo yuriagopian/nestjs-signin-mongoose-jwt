@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
@@ -24,6 +29,16 @@ export class UsersService {
     signinDto: SigninDto,
   ): Promise<{ name: string; jwtToken: string; email: string }> {
     const user = await this.findByEmail(signinDto.email);
+
+    const match = await this.checkPassword(signinDto.password, user);
+
+    if (!match) {
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    const jwtToken = await this.authService.createAccessToken(user._id);
+
+    return { name: user.name, jwtToken, email: user.email };
   }
 
   private async findByEmail(email: string): Promise<User> {
@@ -34,5 +49,15 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  private async checkPassword(password: string, user: User): Promise<boolean> {
+    const match = await bcrypt.compare(password, user.password);
+
+    if (!match) {
+      throw new UnauthorizedException();
+    }
+
+    return match;
   }
 }
