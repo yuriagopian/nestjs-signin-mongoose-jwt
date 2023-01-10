@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import { AuthService } from 'src/auth/auth.service';
 import { SigninDto } from './dto/signin.dto';
-import { SignupDto } from './dto/singup.dto';
+import { SignupDto } from './dto/signup.dto';
 import { User } from './models/users.model';
 
 @Injectable()
